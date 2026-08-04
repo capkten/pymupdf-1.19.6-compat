@@ -46,11 +46,13 @@ jobs:
           python -c "import fitz, sys; print(sys.version); print(fitz.VersionBind, fitz.VersionFitz)"
           python -m pytest tests/test_python_compatibility.py -q
 
-      - name: Upload wheel and build metadata
+      - name: Upload wheel and build diagnostics
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: PyMuPDF-1.19.6-py${{ matrix.python-version }}-win_amd64
           path: |
             dist/*.whl
             ci/versions.json
-          if-no-files-found: error
+            ci-build.log
+          if-no-files-found: warn

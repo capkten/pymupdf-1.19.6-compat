@@ -9,6 +9,10 @@ $repo = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $mupdf = Join-Path $repo "mupdf"
 $release = Join-Path $mupdf "platform\win32\x64\Release"
 $pythonRoot = Split-Path -Parent $Python
+$transcript = Join-Path $repo "ci-build.log"
+
+Start-Transcript -Path $transcript -Force | Out-Null
+try {
 
 if (-not (Test-Path $mupdf)) {
     throw "MuPDF source is missing: $mupdf"
@@ -71,4 +75,7 @@ try {
     $wheel.FullName
 } finally {
     Pop-Location
+}
+} finally {
+    Stop-Transcript | Out-Null
 }
