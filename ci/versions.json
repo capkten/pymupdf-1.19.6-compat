@@ -1,0 +1,8 @@
+{
+  "pymupdf": "1.19.6",
+  "mupdf_tag": "1.19.0",
+  "mupdf_commit": "5f966a513775dcc95e999c988a02eeca7697fe2b",
+  "swig": "4.0.2",
+  "architecture": "x64",
+  "visual_studio": "17"
+}
