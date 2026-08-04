@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.11", "3.12"]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
 
     steps:
       - name: Check out PyMuPDF compatibility source
@@ -48,6 +48,7 @@ jobs:
           try {
             python -c "import fitz, sys; print(sys.version); print(fitz.VersionBind, fitz.VersionFitz)"
             python -m pytest "$env:GITHUB_WORKSPACE\tests\test_python_compatibility.py" -q
+            python -m pytest "$env:GITHUB_WORKSPACE\tests" -q
           } finally {
             Pop-Location
           }

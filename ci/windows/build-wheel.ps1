@@ -30,7 +30,7 @@ $env:MUPDF_PYTHON_INCLUDE_PATH = Join-Path $pythonRoot "Include"
 $env:MUPDF_PYTHON_LIBRARY_PATH = Join-Path $pythonRoot "libs"
 
 python -m pip install --upgrade pip setuptools wheel
-python -m pip install "swig==4.0.2" "pytest==6.2.5"
+python -m pip install "swig==4.0.2" "pytest==8.3.5"
 
 $msbuild = (Get-Command msbuild.exe -ErrorAction SilentlyContinue).Source
 if (-not $msbuild) {
