@@ -4,10 +4,11 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
+    tags: ["compat-v*"]
   pull_request:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -46,6 +47,23 @@ jobs:
           python -m pip install --force-reinstall --no-deps $wheel
           Push-Location $env:RUNNER_TEMP
           try {
+            $diagLog = Join-Path $env:RUNNER_TEMP "native-diagnostics.txt"
+            Remove-Item $diagLog -Force -ErrorAction SilentlyContinue
+            function Invoke-NativeProbe([string] $name, [string] $code) {
+              Add-Content $diagLog "=== $name ==="
+              Add-Content $diagLog "python: $((Get-Command python).Source)"
+              Add-Content $diagLog "version: $(& python --version 2>&1)"
+              $env:PYTHONMALLOC = "debug"
+              & python -X dev -c $code 2>&1 | Tee-Object -FilePath $diagLog -Append
+              $probeExit = $LASTEXITCODE
+              Add-Content $diagLog "exit_code: $probeExit"
+              Add-Content $diagLog ""
+              return $probeExit
+            }
+            Invoke-NativeProbe "import" "import fitz; print(fitz.VersionBind, fitz.VersionFitz)" | Out-Null
+            Invoke-NativeProbe "empty-document" "import fitz; d=fitz.open(); d.close(); print('closed')" | Out-Null
+            Invoke-NativeProbe "smoke" "import fitz; d=fitz.open(); p=d.new_page(); p.insert_text((72,72), 'smoke'); print(p.get_text()); d.close()" | Out-Null
+            Remove-Item Env:PYTHONMALLOC -ErrorAction SilentlyContinue
             python -c "import fitz, sys; print(sys.version); print(fitz.VersionBind, fitz.VersionFitz)"
             python -m pytest "$env:GITHUB_WORKSPACE\tests\test_python_compatibility.py" -q
             # These two historical assertions are native-output baselines that
@@ -57,6 +75,15 @@ jobs:
             Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "## Pytest output ($env:pythonLocation)"
             Get-Content $testLog | Add-Content -Path $env:GITHUB_STEP_SUMMARY
             if ($testExit -ne 0) {
+              $moduleLog = Join-Path $env:RUNNER_TEMP "pytest-modules.txt"
+              Remove-Item $moduleLog -Force -ErrorAction SilentlyContinue
+              Get-ChildItem "$env:GITHUB_WORKSPACE\tests\test_*.py" | Sort-Object Name | ForEach-Object {
+                $module = $_.FullName
+                Add-Content $moduleLog "=== $($_.Name) ==="
+                & python -m pytest $module -q 2>&1 | Tee-Object -FilePath $moduleLog -Append
+                Add-Content $moduleLog "exit_code: $LASTEXITCODE"
+                Add-Content $moduleLog ""
+              }
               throw "Pytest compatibility regression failed with exit code $testExit"
             }
           } finally {
@@ -73,4 +100,32 @@ jobs:
             ci/versions.json
             ci-build.log
             ${{ runner.temp }}/pytest-output.txt
+            ${{ runner.temp }}/native-diagnostics.txt
+            ${{ runner.temp }}/pytest-modules.txt
           if-no-files-found: warn
+
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/compat-v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download wheels
+        uses: actions/download-artifact@v4
+        with:
+          pattern: PyMuPDF-1.19.6-py*-win_amd64
+          path: release-assets
+          merge-multiple: true
+
+      - name: Publish GitHub Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          shopt -s nullglob
+          wheels=(release-assets/*.whl)
+          test "${#wheels[@]}" -eq 4
+          gh release create "${GITHUB_REF_NAME}" "${wheels[@]}" \
+            --title "PyMuPDF 1.19.6 compatible wheels (${GITHUB_REF_NAME})" \
+            --generate-notes
