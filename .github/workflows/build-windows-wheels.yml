@@ -51,7 +51,14 @@ jobs:
             # These two historical assertions are native-output baselines that
             # differ in this MuPDF 1.19.0 build; all other legacy tests remain
             # mandatory compatibility gates.
-            python -m pytest "$env:GITHUB_WORKSPACE\tests" -q -k "not test_pageids and not test_textbox3"
+            $testLog = Join-Path $env:RUNNER_TEMP "pytest-output.txt"
+            & python -m pytest "$env:GITHUB_WORKSPACE\tests" -q -k "not test_pageids and not test_textbox3" 2>&1 | Tee-Object -FilePath $testLog
+            $testExit = $LASTEXITCODE
+            Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "## Pytest output ($env:pythonLocation)"
+            Get-Content $testLog | Add-Content -Path $env:GITHUB_STEP_SUMMARY
+            if ($testExit -ne 0) {
+              throw "Pytest compatibility regression failed with exit code $testExit"
+            }
           } finally {
             Pop-Location
           }
@@ -65,4 +72,5 @@ jobs:
             dist/*.whl
             ci/versions.json
             ci-build.log
+            ${{ runner.temp }}/pytest-output.txt
           if-no-files-found: warn
