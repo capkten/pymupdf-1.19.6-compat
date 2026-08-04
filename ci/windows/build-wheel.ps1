@@ -22,6 +22,10 @@ if (-not (Test-Path (Join-Path $mupdf "platform\win32\mupdf.sln"))) {
 }
 
 New-Item -ItemType Directory -Force $release | Out-Null
+New-Item -ItemType Directory -Force (Join-Path $release "libresources") | Out-Null
+$env:CL = "/utf-8"
+$env:VSLANG = "1033"
+$null = cmd.exe /c "chcp 65001 > nul"
 $env:MUPDF_PYTHON_INCLUDE_PATH = Join-Path $pythonRoot "Include"
 $env:MUPDF_PYTHON_LIBRARY_PATH = Join-Path $pythonRoot "libs"
 
