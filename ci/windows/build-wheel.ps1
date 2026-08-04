@@ -42,6 +42,7 @@ if (-not (Test-Path $msbuild)) {
     /m `
     /p:Configuration=Release `
     /p:Platform=x64 `
+    /p:PlatformToolset=v143 `
     /p:WindowsTargetPlatformVersion=10.0
 if ($LASTEXITCODE -ne 0) {
     throw "MuPDF native build failed with exit code $LASTEXITCODE"
