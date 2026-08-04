@@ -7,4 +7,6 @@ Visual Studio solution before invoking the PyMuPDF `setup.py` extension build.
 The native source is intentionally fetched in CI instead of committed into
 this repository. This keeps the compatibility repository small while making
 the exact native revision explicit and auditable in `versions.json` and the
-workflow.
+workflow. The build targets `libmupdf.vcxproj` directly instead of the full
+viewer solution, because PyMuPDF does not need the unrelated curl/viewer
+projects and the old solution contains a Win32-only curl link target.

@@ -42,14 +42,40 @@ if (-not (Test-Path $msbuild)) {
     throw "MSBuild was not found"
 }
 
-& $msbuild (Join-Path $mupdf "platform\win32\mupdf.sln") `
-    /m `
-    /p:Configuration=Release `
-    /p:Platform=x64 `
-    /p:PlatformToolset=v143 `
-    /p:WindowsTargetPlatformVersion=10.0
-if ($LASTEXITCODE -ne 0) {
-    throw "MuPDF native build failed with exit code $LASTEXITCODE"
+function Invoke-MuPdfProject([string] $project, [string] $platform) {
+    & $msbuild (Join-Path $mupdf "platform\win32\$project") `
+        /m `
+        /p:Configuration=Release `
+        /p:Platform=$platform `
+        /p:PlatformToolset=v143 `
+        /p:WindowsTargetPlatformVersion=10.0 `
+        /p:BuildProjectReferences=false `
+        /v:minimal
+    if ($LASTEXITCODE -ne 0) {
+        throw "MuPDF project $project failed with exit code $LASTEXITCODE"
+    }
+}
+
+# bin2coff is a Win32-only helper used by the x64 resource project.
+Invoke-MuPdfProject "bin2coff.vcxproj" "Win32"
+$resourceProject = Join-Path $mupdf "platform\win32\libresources.vcxproj"
+$resourceXml = New-Object System.Xml.XmlDocument
+$resourceXml.Load($resourceProject)
+$bin2coffReference = $resourceXml.SelectSingleNode("//*[local-name()='ProjectReference' and @Include='bin2coff.vcxproj']")
+if ($bin2coffReference) {
+    [void] $bin2coffReference.ParentNode.RemoveChild($bin2coffReference)
+    $resourceXml.Save($resourceProject)
+}
+foreach ($project in @(
+    "libthirdparty.vcxproj",
+    "libleptonica.vcxproj",
+    "libtesseract.vcxproj",
+    "libextract.vcxproj",
+    "libpkcs7.vcxproj",
+    "libresources.vcxproj",
+    "libmupdf.vcxproj"
+)) {
+    Invoke-MuPdfProject $project "x64"
 }
 
 $requiredLibraries = @(
