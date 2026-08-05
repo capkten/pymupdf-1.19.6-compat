@@ -20,6 +20,7 @@ git -C "${MUPDF_SOURCE}" submodule update --init --depth 1
 
 if ! make -C "${MUPDF_SOURCE}" -j"$(nproc)" libs \
     build=release \
+    XCFLAGS=-fPIC \
     HAVE_X11=no \
     HAVE_GLUT=no \
     HAVE_CURL=no \
