@@ -33,9 +33,14 @@ for test_file in tests:
         for node_id in node_ids:
             print("=== pytest isolated " + node_id + " ===", flush=True)
             isolated = subprocess.run(
-                [sys.executable, "-m", "pytest", node_id, "-q", "-k", "not test_pageids and not test_textbox3"],
+                [sys.executable, "-m", "pytest", node_id, "-q"],
+                cwd=project_root,
+                capture_output=True,
+                text=True,
                 check=False,
             )
+            print(isolated.stdout, end="", flush=True)
+            print(isolated.stderr, end="", flush=True)
             if isolated.returncode:
                 print(
                     "::error title=Linux regression {}::exit code {}".format(node_id, isolated.returncode),
