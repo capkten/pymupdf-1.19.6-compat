@@ -21,6 +21,8 @@ run_probe document-smoke python -X dev -c "import fitz; d=fitz.open(); p=d.new_p
 for test_file in "${PROJECT_ROOT}"/tests/test_*.py; do
     test_name="$(basename "${test_file}")"
     test_log="${PROJECT_ROOT}/pytest-${test_name}.log"
+    SetMarker="${PROJECT_ROOT}/current-test.txt"
+    echo "${test_name}" >"${SetMarker}"
     echo "=== pytest ${test_name} ==="
     if python -m pytest "${test_file}" -q -k "not test_pageids and not test_textbox3" >"${test_log}" 2>&1; then
         cat "${test_log}"
