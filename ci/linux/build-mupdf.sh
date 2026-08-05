@@ -9,10 +9,18 @@ PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 exec > >(tee -a "${PROJECT_ROOT}/mupdf-build.log") 2>&1
 
 rm -rf "${MUPDF_SOURCE}" "${MUPDF_PREFIX}"
-if [[ "${EUID}" -eq 0 ]]; then
-    yum install -y git
-else
-    sudo yum install -y git
+if ! command -v git >/dev/null 2>&1; then
+    if command -v dnf >/dev/null 2>&1; then
+        dnf install -y git
+    elif command -v yum >/dev/null 2>&1; then
+        yum install -y git
+    elif command -v sudo >/dev/null 2>&1; then
+        sudo apt-get update
+        sudo apt-get install -y git
+    else
+        echo "No supported package manager is available to install git" >&2
+        exit 127
+    fi
 fi
 git --version
 git clone --no-checkout https://github.com/ArtifexSoftware/mupdf.git "${MUPDF_SOURCE}"
