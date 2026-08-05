@@ -8,10 +8,7 @@ if python setup.py build_ext --inplace >"${LOG}" 2>&1; then
     exit 0
 fi
 
-grep -Ei 'error:|fatal error:|undefined reference|cannot find|command not found' "${LOG}" \
-    | tail -n 30 \
-    | while IFS= read -r line; do
-        echo "::error title=PyMuPDF extension build::${line}"
-    done
+diagnostic="$(grep -Ei 'error:|fatal error:|undefined reference|cannot find|command not found' "${LOG}" | tail -n 20 | tr '\n' ';' || true)"
+echo "::error title=PyMuPDF extension build::${diagnostic}"
 tail -n 30 "${LOG}"
 exit 1

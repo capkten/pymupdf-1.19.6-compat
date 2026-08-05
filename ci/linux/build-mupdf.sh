@@ -60,7 +60,8 @@ cat > "${MUPDF_PREFIX}/pymupdf-dirs.json" <<EOF
     "${MUPDF_PREFIX}/include/mupdf",
     "${MUPDF_PREFIX}/thirdparty/freetype/include"
   ],
-  "library_dirs": ["${MUPDF_PREFIX}/lib"]
+  "library_dirs": ["${MUPDF_PREFIX}/lib"],
+  "extra_link_args": ["-lm", "-pthread", "-ldl"]
 }
 EOF
 
