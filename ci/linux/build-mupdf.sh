@@ -22,7 +22,7 @@ if ! make -C "${MUPDF_SOURCE}" -j"$(nproc)" libs \
     HAVE_TESSERACT=no; then
     while IFS= read -r line; do
         echo "::error title=MuPDF build::${line}"
-    done < <(tail -n 20 "${PROJECT_ROOT}/mupdf-build.log")
+    done < <(grep -Ei 'error:|fatal error:|no such file|cannot find|undefined reference|command not found' "${PROJECT_ROOT}/mupdf-build.log" | tail -n 20 || true)
     exit 1
 fi
 
