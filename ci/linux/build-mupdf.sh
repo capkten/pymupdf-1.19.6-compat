@@ -13,13 +13,18 @@ curl --fail --silent --show-error --location \
     "https://github.com/ArtifexSoftware/mupdf/archive/${MUPDF_COMMIT}.tar.gz" \
     | tar -xz --strip-components=1 -C "${MUPDF_SOURCE}"
 
-make -C "${MUPDF_SOURCE}" -j"$(nproc)" libs \
+if ! make -C "${MUPDF_SOURCE}" -j"$(nproc)" libs \
     build=release \
     HAVE_X11=no \
     HAVE_GLUT=no \
     HAVE_CURL=no \
     HAVE_LEPTONICA=no \
-    HAVE_TESSERACT=no
+    HAVE_TESSERACT=no; then
+    while IFS= read -r line; do
+        echo "::error title=MuPDF build::${line}"
+    done < <(tail -n 20 "${PROJECT_ROOT}/mupdf-build.log")
+    exit 1
+fi
 
 mkdir -p "${MUPDF_PREFIX}/include" \
     "${MUPDF_PREFIX}/thirdparty/freetype/include" \
