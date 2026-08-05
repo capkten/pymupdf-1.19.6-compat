@@ -19,6 +19,10 @@ lineheight = fontsize + 4.0
 rect = fitz.Rect(50, 72, 400, 200)
 
 
+def teardown_module():
+    doc.close()
+
+
 def test_text():
     doc = fitz.open()
     page = doc.new_page()
@@ -40,6 +44,7 @@ def test_text():
     page.add_widget(widget)  # create the field
     field = page.first_widget
     assert field.field_type_string == "Text"
+    doc.close()
 
 
 def test_checkbox():
@@ -58,6 +63,7 @@ def test_checkbox():
     page.add_widget(widget)  # create the field
     field = page.first_widget
     assert field.field_type_string == "CheckBox"
+    doc.close()
 
 
 def test_listbox():
@@ -87,6 +93,7 @@ def test_listbox():
     page.add_widget(widget)  # create the field
     field = page.first_widget
     assert field.field_type_string == "ListBox"
+    doc.close()
 
 
 def test_combobox():
@@ -123,6 +130,7 @@ def test_combobox():
     page.add_widget(widget)  # create the field
     field = page.first_widget
     assert field.field_type_string == "ComboBox"
+    doc.close()
 
 
 def test_text2():
@@ -144,6 +152,7 @@ def test_text2():
     widgets = [w for w in page.widgets()]
     field = widgets[0]
     assert field.field_type_string == "Text"
+    doc.close()
 
 
 # def test_deletewidget():
