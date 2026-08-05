@@ -75,4 +75,5 @@ jobs:
             ci/versions.json
             mupdf-build.log
             python-build.log
+            pytest-*.log
           if-no-files-found: warn

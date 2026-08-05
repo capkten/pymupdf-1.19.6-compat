@@ -19,5 +19,17 @@ run_probe import python -X dev -c "import fitz; print(fitz.VersionBind, fitz.Ver
 run_probe empty-document python -X dev -c "import fitz; d=fitz.open(); d.close(); print('closed')"
 run_probe document-smoke python -X dev -c "import fitz; d=fitz.open(); p=d.new_page(); p.insert_text((72,72), 'smoke'); print(p.get_text()); d.close()"
 for test_file in "${PROJECT_ROOT}"/tests/test_*.py; do
-    run_probe "pytest $(basename "${test_file}")" python -m pytest "${test_file}" -q
+    test_name="$(basename "${test_file}")"
+    test_log="${PROJECT_ROOT}/pytest-${test_name}.log"
+    echo "=== pytest ${test_name} ==="
+    if python -m pytest "${test_file}" -q >"${test_log}" 2>&1; then
+        cat "${test_log}"
+        echo "pytest ${test_name}: PASS"
+    else
+        code=$?
+        diagnostic="$(grep -E 'FAILED|ERROR|passed|failed|AssertionError|ValueError' "${test_log}" | tail -n 20 | tr '\n' ';' || true)"
+        echo "::error title=Linux regression ${test_name}::${diagnostic}"
+        cat "${test_log}"
+        exit "${code}"
+    fi
 done
