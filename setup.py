@@ -154,6 +154,7 @@ if pymupdf_dirs:
         local_dirs = json.load(dirfile)
         include_dirs += local_dirs.get("include_dirs", [])
         library_dirs += local_dirs.get("library_dirs", [])
+        libraries = local_dirs.get("libraries", libraries)
         extra_link_args += local_dirs.get("extra_link_args", [])
 
 
