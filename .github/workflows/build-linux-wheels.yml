@@ -63,7 +63,7 @@ jobs:
           test "${#wheels[@]}" -eq 3
           for wheel in "${wheels[@]}"; do
             echo "INSPECT=$wheel"
-            python -m zipfile -l "$wheel" | grep -E 'fitz/(_fitz|fitz).*\.(so|py)$'
+            python -c "import sys, zipfile; names=zipfile.ZipFile(sys.argv[1]).namelist(); assert any(n.startswith('fitz/_fitz') and n.endswith('.so') for n in names); assert 'fitz/__init__.py' in names" "$wheel"
             case "$wheel" in
               *manylinux2014_${{ matrix.arch }}.whl) ;;
               *) echo "Unexpected Linux wheel tag: $wheel" >&2; exit 1 ;;
