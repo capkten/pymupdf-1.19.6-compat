@@ -5,17 +5,13 @@ MUPDF_COMMIT="5f966a513775dcc95e999c988a02eeca7697fe2b"
 MUPDF_PREFIX="/opt/mupdf"
 MUPDF_SOURCE="/tmp/mupdf"
 
-if [[ "${EUID}" -eq 0 ]]; then
-    yum install -y git
-else
-    sudo yum install -y git
-fi
-
 rm -rf "${MUPDF_SOURCE}" "${MUPDF_PREFIX}"
-git clone --filter=blob:none --no-checkout https://github.com/ArtifexSoftware/mupdf.git "${MUPDF_SOURCE}"
-git -C "${MUPDF_SOURCE}" checkout --detach "${MUPDF_COMMIT}"
+mkdir -p "${MUPDF_SOURCE}"
+curl --fail --silent --show-error --location \
+    "https://github.com/ArtifexSoftware/mupdf/archive/${MUPDF_COMMIT}.tar.gz" \
+    | tar -xz --strip-components=1 -C "${MUPDF_SOURCE}"
 
-make -C "${MUPDF_SOURCE}" -j"$(nproc)" \
+make -C "${MUPDF_SOURCE}" -j"$(nproc)" libs \
     build=release \
     HAVE_X11=no \
     HAVE_GLUT=no \
