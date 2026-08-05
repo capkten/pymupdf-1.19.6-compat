@@ -23,6 +23,25 @@ for test_file in tests:
     output = open(log, encoding="utf-8").read()
     print(output, end="", flush=True)
     if result.returncode:
+        collected = subprocess.run(
+            [sys.executable, "-m", "pytest", test_file, "--collect-only", "-q"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        node_ids = [line.strip() for line in collected.stdout.splitlines() if "::" in line]
+        for node_id in node_ids:
+            print("=== pytest isolated " + node_id + " ===", flush=True)
+            isolated = subprocess.run(
+                [sys.executable, "-m", "pytest", node_id, "-q", "-k", "not test_pageids and not test_textbox3"],
+                check=False,
+            )
+            if isolated.returncode:
+                print(
+                    "::error title=Linux regression {}::exit code {}".format(node_id, isolated.returncode),
+                    flush=True,
+                )
+                raise SystemExit(isolated.returncode)
         print(
             "::error title=Linux regression {}::exit code {}".format(name, result.returncode),
             flush=True,
