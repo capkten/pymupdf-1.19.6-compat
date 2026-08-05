@@ -8,10 +8,15 @@ PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 exec > >(tee -a "${PROJECT_ROOT}/mupdf-build.log") 2>&1
 
 rm -rf "${MUPDF_SOURCE}" "${MUPDF_PREFIX}"
-mkdir -p "${MUPDF_SOURCE}"
-curl --fail --silent --show-error --location \
-    "https://github.com/ArtifexSoftware/mupdf/archive/${MUPDF_COMMIT}.tar.gz" \
-    | tar -xz --strip-components=1 -C "${MUPDF_SOURCE}"
+if [[ "${EUID}" -eq 0 ]]; then
+    yum install -y git
+else
+    sudo yum install -y git
+fi
+git clone --no-checkout https://github.com/ArtifexSoftware/mupdf.git "${MUPDF_SOURCE}"
+git -C "${MUPDF_SOURCE}" fetch --depth 1 origin "${MUPDF_COMMIT}"
+git -C "${MUPDF_SOURCE}" checkout --detach "${MUPDF_COMMIT}"
+git -C "${MUPDF_SOURCE}" submodule update --init --depth 1
 
 if ! make -C "${MUPDF_SOURCE}" -j"$(nproc)" libs \
     build=release \
