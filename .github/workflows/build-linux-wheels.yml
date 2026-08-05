@@ -56,10 +56,13 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
+          trap 'echo "::error title=Linux wheel inspection::line=${LINENO} command=${BASH_COMMAND}"' ERR
           shopt -s nullglob
           wheels=(wheelhouse/*.whl)
+          printf 'WHEELS=%s\n' "${wheels[*]}"
           test "${#wheels[@]}" -eq 3
           for wheel in "${wheels[@]}"; do
+            echo "INSPECT=$wheel"
             python -m zipfile -l "$wheel" | grep -E 'fitz/(_fitz|fitz).*\.(so|py)$'
             case "$wheel" in
               *manylinux2014_${{ matrix.arch }}.whl) ;;
