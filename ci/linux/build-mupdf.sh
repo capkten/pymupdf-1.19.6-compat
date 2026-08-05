@@ -4,6 +4,8 @@ set -Eeuo pipefail
 MUPDF_COMMIT="5f966a513775dcc95e999c988a02eeca7697fe2b"
 MUPDF_PREFIX="/opt/mupdf"
 MUPDF_SOURCE="/tmp/mupdf"
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+exec > >(tee -a "${PROJECT_ROOT}/mupdf-build.log") 2>&1
 
 rm -rf "${MUPDF_SOURCE}" "${MUPDF_PREFIX}"
 mkdir -p "${MUPDF_SOURCE}"

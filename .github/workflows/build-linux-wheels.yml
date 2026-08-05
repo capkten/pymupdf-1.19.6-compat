@@ -73,4 +73,5 @@ jobs:
           path: |
             wheelhouse/*.whl
             ci/versions.json
+            mupdf-build.log
           if-no-files-found: warn
