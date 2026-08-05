@@ -18,4 +18,6 @@ run_probe() {
 run_probe import python -X dev -c "import fitz; print(fitz.VersionBind, fitz.VersionFitz)"
 run_probe empty-document python -X dev -c "import fitz; d=fitz.open(); d.close(); print('closed')"
 run_probe document-smoke python -X dev -c "import fitz; d=fitz.open(); p=d.new_page(); p.insert_text((72,72), 'smoke'); print(p.get_text()); d.close()"
-run_probe pytest python -m pytest "${PROJECT_ROOT}/tests" -q
+for test_file in "${PROJECT_ROOT}"/tests/test_*.py; do
+    run_probe "pytest $(basename "${test_file}")" python -m pytest "${test_file}" -q
+done
