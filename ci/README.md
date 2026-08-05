@@ -15,9 +15,8 @@ projects and the old solution contains a Win32-only curl link target.
 The default release matrix is Python 3.10, 3.11 and 3.12 on Windows x64,
 Linux x86_64 and Linux aarch64. Linux wheels are built in manylinux2014
 containers, repaired with `auditwheel`, installed into a clean environment,
-and tested before upload. Linux aarch64 is built and tested through the
-CI's aarch64 container path; a green job is required before an artifact is
-considered usable.
+and tested before upload. Linux aarch64 uses the native `ubuntu-24.04-arm`
+runner; a green job is required before an artifact is considered usable.
 
 Linux 32-bit i686 is intentionally not in the default matrix because the
 official PyMuPDF 1.19.6 release did not publish that platform. It should be
