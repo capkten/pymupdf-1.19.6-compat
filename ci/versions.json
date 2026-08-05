@@ -4,5 +4,10 @@
   "mupdf_commit": "5f966a513775dcc95e999c988a02eeca7697fe2b",
   "swig": "4.0.2",
   "architecture": "x64",
-  "visual_studio": "17"
+  "visual_studio": "17",
+  "linux_wheel_platforms": [
+    "manylinux2014_x86_64",
+    "manylinux2014_aarch64"
+  ],
+  "python_versions": ["3.10", "3.11", "3.12"]
 }
