@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
+trap 'code=$?; echo "::error title=MuPDF bootstrap::exit=${code} line=${BASH_LINENO[0]} command=${BASH_COMMAND}"; exit ${code}' ERR
 
 MUPDF_COMMIT="5f966a513775dcc95e999c988a02eeca7697fe2b"
 MUPDF_PREFIX="/opt/mupdf"
@@ -13,6 +14,7 @@ if [[ "${EUID}" -eq 0 ]]; then
 else
     sudo yum install -y git
 fi
+git --version
 git clone --no-checkout https://github.com/ArtifexSoftware/mupdf.git "${MUPDF_SOURCE}"
 git -C "${MUPDF_SOURCE}" fetch --depth 1 origin "${MUPDF_COMMIT}"
 git -C "${MUPDF_SOURCE}" checkout --detach "${MUPDF_COMMIT}"
